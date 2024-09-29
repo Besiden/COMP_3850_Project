@@ -47,9 +47,28 @@ def GenerateSuperfundQuery(SuperFundName):
 def GenerateESGQuery(ESGList):
     outputstring = 'Show me Superfunds that Invest in '
     for x in ESGList:
+  
         outputstring += x+' ,'
     outputstring +='.'
     print(outputstring)
+
+## Not yet implemented
+def SendQuerytoChatGPT():
+    return GenerateESGQuery(any)
+
+def GetFrontEndInput():
+    return something
+
+def GenerateSQLQuery(name, type ,ESGLIST):
+    if(type == superfund):
+        return 'SELECT'+name+'from Superfunds'
+    if(type == ESG):
+        Outstring = ''
+        for x in ESGLIST:
+            Outstring+= 'ESGTHEMES = '+x+'AND'
+            
+        return 'SELECT ESGTHEMES FROM SUPER_ESG WHERE'
+
 
 
 
