@@ -20,7 +20,7 @@ for i in Superlist:
     print(i.name)
     print(i.ESG)
 
-## List of Generated ESG Catergories from user prompt -> Currently filled with static values
+## List of Generated ESG Catergories from user prompt -> Currently filleA with static values
 ESGList =[]
 ESGList.append('Weapons')
 ESGList.append('Drugs')
@@ -67,7 +67,7 @@ def GenerateSQLQuery(name, type ,ESGLIST):
         for x in ESGLIST:
             Outstring+= 'ESGTHEMES = '+x+'AND'
             
-        return 'SELECT ESGTHEMES FROM SUPER_ESG WHERE'
+        return 'SELECT ESGTHEMES FROM SUPER_ESG WHERE'+Outstring
 
 
 
