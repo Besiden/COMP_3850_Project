@@ -62,8 +62,9 @@ class RequestHandler(BaseHTTPRequestHandler):
         and returns the corresponding message.
         """
         # Initialize the message
-        response_message = 'no valid combination selected'
-
+        response_message = 'no valid combination selected' 
+        # Should be re-written to null check(None Selected) and then pass input through to Generate AI function
+        # Currently not scaleable as is
         # Check for specific ESG combinations
         if len(esg_selected) == 3:
             response_message = 'all ESG options selected'
@@ -80,6 +81,19 @@ class RequestHandler(BaseHTTPRequestHandler):
         elif 'ESG Option 3' in esg_selected:
             response_message = 'only ESG Option 3 selected'
 
+        # Some thoughts about this function , change to switch case and define function to generate call somewhere else
+        # for example
+        # switch ()
+#         case 1:
+#           generaterespone(Super1)    
+#         case 2:
+#           generateresponse(Super2)
+#
+#        def  generateresponse(Supername):
+#             inputpdf =  genai.upload_file("supername.pdf")
+#         response = model.generate_content(["Give me a basic outline of the ESG Policy of "+supername+" based on the provided PDF , in less than 100 words", inputpdf])
+#         return response.text      
+#         
         # Handle Super options
         if super_selected:
             if super_selected == 'Super Option 1':
