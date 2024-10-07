@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super/ESG Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(120deg, #7dbcf3 0%, #8ec5fc 100%);
+        }
+        h1, h3 {
+            text-align: center;
+            color: #333;
+            user-select: none;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgb(187, 217, 247);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-section {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.5s ease-out, opacity 0.5s ease-out;
+        }
+        .form-section.active {
+            max-height: 500px;
+            opacity: 1;
+            transition: max-height 0.5s ease-in, opacity 0.5s ease-in;
+        }
+        label {
+            display: block;
+            margin: 10px 0;
+            user-select: none;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin-top: 20px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        button:focus {
+            outline: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        /* Style for Back button */
+        .back-button {
+            background-color: #FF4D4D; /* Red background for Back button */
+        }
+        .back-button:hover {
+            background-color: #CC0000; /* Darker red on hover */
+        }
+        .hidden {
+            display: none;
+        }
+        #result-page {
+            opacity: 0;
+            pointer-events: none;
+            text-align: center;
+            padding: 20px;
+            transition: opacity 0.5s ease-in-out;
+        }
+        #result-page.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        #result-value {
+            font-size: 1.5em;
+            color: #007BFF;
+            user-select: none; 
+            cursor: default;   
+        }
+        /* Transition styles for smooth page transitions */
+        .fade-out {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .fade-in {
+            opacity: 1;
+            pointer-events: all;
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+    <script>
+        function showSection(sectionId) {
+            document.getElementById('home-section').classList.add('hidden');
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            setTimeout(() => {
+                var section = document.getElementById(sectionId);
+                section.classList.add('active');
+            }, 100);
+        }
+
+        async function handleSubmit(sectionId) {
+            var selectedSuper = document.querySelector('input[name="superOption"]:checked');
+            var selectedEsg = document.querySelectorAll('input[name="esgOption"]:checked');
+            
+            var superValue = selectedSuper ? selectedSuper.value : null;
+            var esgValues = Array.from(selectedEsg).map(checkbox => checkbox.value);
+
+            if (sectionId === 'super-section' && !superValue) {
+                alert('Please select a Super option before submitting.');
+                return;
+            }
+
+            if (sectionId === 'esg-section' && esgValues.length === 0) {
+                alert('Please select at least one ESG option before submitting.');
+                return;
+            }
+
+            var data = {
+                superSelected: superValue,
+                esgSelected: esgValues
+            };
+
+            // Send data to Python server
+            const response = await fetch('http://localhost:8000/process', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            // Update the result text first
+            document.getElementById('result-value').textContent = result.value;
+
+            // Then switch to the result page with a fade-in effect
+            document.getElementById('form-page').style.opacity = 0;
+            setTimeout(() => {
+                document.getElementById('form-page').style.display = 'none';
+                document.getElementById('result-page').style.display = 'block';
+                document.getElementById('result-page').style.opacity = 1;
+                document.getElementById('result-page').style.pointerEvents = 'all';
+            }, 500);
+        }
+
+        function goBackToForm() {
+            // Fade out result page and fade in form page
+            document.getElementById('result-page').style.opacity = 0;
+            setTimeout(() => {
+                document.getElementById('result-page').style.pointerEvents = 'none';
+                document.getElementById('form-page').style.display = 'block';
+                document.getElementById('form-page').style.opacity = 1;
+            }, 500);
+        }
+
+        function goBackToHome() {
+            // Hide active sections and go back to the home section
+            document.querySelectorAll('.form-section').forEach(section => {
+                section.classList.remove('active');
+            });
+            setTimeout(() => {
+                document.getElementById('home-section').classList.remove('hidden');
+            }, 500); // Wait for the transition to finish
+        }
+    </script>
+</head>
+<body>
+
+    <!-- Form Page -->
+    <div id="form-page" class="container">
+        <h1>Search by Super or ESG?</h1>
+
+        <!-- Home Section (Super/ESG Choice) -->
+        <div id="home-section" style="max-height: 500px; opacity: 1;">
+            <button type="button" onclick="showSection('super-section')">Super</button>
+            <button type="button" onclick="showSection('esg-section')">ESG</button>
+        </div>
+
+        <!-- Super Section -->
+        <div id="super-section" class="form-section">
+            <h3>Select a Super</h3>
+            <form>
+                <label>
+                    <input type="radio" name="superOption" value="Super Option 1">
+                    Super Option 1
+                </label>
+                <label>
+                    <input type="radio" name="superOption" value="Super Option 2">
+                    Super Option 2
+                </label>
+                <label>
+                    <input type="radio" name="superOption" value="Super Option 3">
+                    Super Option 3
+                </label>
+                <label>
+                    <input type="radio" name="superOption" value="Super Option 4">
+                    Super Option 4
+                </label>
+            </form>
+            <button type="button" onclick="handleSubmit('super-section')">Submit</button>
+            <button type="button" class="back-button" onclick="goBackToHome()">Back</button> <!-- Red Back button -->
+        </div>
+
+        <!-- ESG Section -->
+        <div id="esg-section" class="form-section">
+            <h3>Select an ESG</h3>
+            <form>
+                <label>
+                    <input type="checkbox" name="esgOption" value="ESG Option 1">
+                    ESG Theme 1
+                </label>
+                <label>
+                    <input type="checkbox" name="esgOption" value="ESG Option 2">
+                    ESG Theme 2
+                </label>
+                <label>
+                    <input type="checkbox" name="esgOption" value="ESG Option 3">
+                    ESG Theme 3
+                </label>
+            </form>
+            <button type="button" onclick="handleSubmit('esg-section')">Submit</button>
+            <button type="button" class="back-button" onclick="goBackToHome()">Back</button> <!-- Red Back button -->
+        </div>
+
+    </div>
+
+    <!-- Result Page -->
+    <div id="result-page" class="container" style="opacity: 0;">
+        <h1>Your Result:</h1>
+        <p id="result-value"></p>
+        <button type="button" onclick="goBackToForm()">Back to Form</button>
+    </div>
+
+</body>
+</html>

@@ -66,20 +66,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Should be re-written to null check(None Selected) and then pass input through to Generate AI function
         # Currently not scaleable as is
         # Check for specific ESG combinations
-        if len(esg_selected) == 3:
-            response_message = 'all ESG options selected'
-        elif 'ESG Option 1' in esg_selected and 'ESG Option 2' in esg_selected:
-            response_message = 'hello'  # If ESG 1 and ESG 2 are selected
-        elif 'ESG Option 1' in esg_selected and 'ESG Option 3' in esg_selected:
-            response_message = 'outcome for 1 and 3'
-        elif 'ESG Option 2' in esg_selected and 'ESG Option 3' in esg_selected:
-            response_message = 'outcome for 2 and 3'
-        elif 'ESG Option 1' in esg_selected:
-            response_message = 'only ESG Option 1 selected'
-        elif 'ESG Option 2' in esg_selected:
-            response_message = 'only ESG Option 2 selected'
-        elif 'ESG Option 3' in esg_selected:
-            response_message = 'only ESG Option 3 selected'
+        if len(esg_selected) > 0:
+            print(esg_selected)
+            response = model.generate_content("Output a list of Superfunds that invest in the following ESG's ".join(str(esg_selected)))
+            esg_selected = False
+            return response.text
 
         # Some thoughts about this function , change to switch case and define function to generate call somewhere else
         # for example
@@ -100,6 +91,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 AusSuperPDF = genai.upload_file("AusSuperESG.pdf")
                 response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
                 print(response.text)
+                super_selected = False
                 response_message = response.text
 
 
