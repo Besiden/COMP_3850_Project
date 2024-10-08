@@ -72,33 +72,16 @@ class RequestHandler(BaseHTTPRequestHandler):
             esg_selected = False
             return response.text
 
-        # Some thoughts about this function , change to switch case and define function to generate call somewhere else
-        # for example
-        # switch ()
-#         case 1:
-#           generaterespone(Super1)    
-#         case 2:
-#           generateresponse(Super2)
-#
-#        def  generateresponse(Supername):
-#             inputpdf =  genai.upload_file("supername.pdf")
-#         response = model.generate_content(["Give me a basic outline of the ESG Policy of "+supername+" based on the provided PDF , in less than 100 words", inputpdf])
-#         return response.text      
-#         
+        #Rather than if else case , simply pass name of super through to function
+        
         # Handle Super options
         if super_selected:
-            if super_selected == 'Super Option 1':
-                AusSuperPDF = genai.upload_file("AusSuperESG.pdf")
-                response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
+                AusSuperPDF = genai.upload_file("AusSuperESG.pdf") # < this should change to be a dynamic varaiables selected based on the supe presented
+                response = model.generate_content("Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words")
+                # response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
                 print(response.text)
                 super_selected = False
                 response_message = response.text
-
-
-            elif super_selected == 'Super Option 2':
-                response_message = 'cat'
-            elif super_selected == 'Super Option 3':
-                response_message = 'Super3'
 
         return response_message
 
