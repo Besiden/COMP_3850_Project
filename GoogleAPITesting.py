@@ -76,11 +76,11 @@ class RequestHandler(BaseHTTPRequestHandler):
         
         # Handle Super options
         if super_selected:
-                AusSuperPDF = genai.upload_file("AusSuperESG.pdf") # < this should change to be a dynamic varaiables selected based on the supe presented
-                response = model.generate_content("Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words")
+                SuperPDF = genai.upload_file("Documents/"+super_selected+"/dud.txt") # < this should change to be a dynamic varaiables selected based on the supe presented
+                response = model.generate_content(["Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words and based on the files provided",SuperPDF])
                 # response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
                 print(response.text)
-                super_selected = False
+                super_selected = False  #Reset the variable?
                 response_message = response.text
 
         return response_message
