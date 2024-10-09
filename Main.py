@@ -64,8 +64,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Initialize the message
         response_message = 'no valid combination selected' 
         # Should be re-written to null check(None Selected) and then pass input through to Generate AI function
-        # Currently not scaleable as is
-        # Check for specific ESG combinations
+
         if len(esg_selected) > 0:
             print(esg_selected)
             response = model.generate_content("Output a list of Superfunds that invest in the following ESG's ".join(str(esg_selected)))
@@ -75,8 +74,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         #Rather than if else case , simply pass name of super through to function
         
         # Handle Super options
+        # Change to dynamic file reference
+    
         if super_selected:
-                SuperPDF = genai.upload_file("Documents/"+super_selected+"/dud.txt") # < this should change to be a dynamic varaiables selected based on the supe presented
+                SuperPDF = genai.upload_file("Documents/"+super_selected+"/*.pdf") # < this should change to be a dynamic varaiables selected based on the supe presented
                 response = model.generate_content(["Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words and based on the files provided",SuperPDF])
                 # response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
                 print(response.text)
