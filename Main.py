@@ -6,7 +6,6 @@
 ## Windows powershell : $env:GENERATIVE_AI_API_KEY = "YOUR_API_KEY"
 ## Linux/mac : export GENERATIVE_AI_API_KEY="YOUR_API_KEY"
 
-## Modify Line 21 To the desired prompt
 ## The prompt will be printed in the terminal
 
 ## requires python to be installed on your machine 
@@ -22,8 +21,6 @@ genai.configure(api_key=os.environ["GENERATIVE_AI_API_KEY"])
 model = genai.GenerativeModel("gemini-1.5-flash")
 # response = model.generate_content("Say Hello")
 # print(response.text)
-
-
 
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -87,7 +84,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 # *SuperPDF: * to unpack the list of file paths
                 response = model.generate_content([prompt,*SuperPDF])
                 '''
-                SuperPDF = genai.upload_file("Documents/"+super_selected+"/*.pdf") # < this should change to be a dynamic varaiables selected based on the supe presented
+                SuperPDF = genai.upload_file("Documents/"+super_selected+"/dud.txt") # < this should change to be a dynamic varaiables selected based on the supe presented
                 response = model.generate_content(["Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words and based on the files provided",SuperPDF])
                 # response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
                 
