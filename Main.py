@@ -65,9 +65,10 @@ class RequestHandler(BaseHTTPRequestHandler):
 
         if len(esg_selected) > 0:
             print(esg_selected)
-            response = model.generate_content("Output a list of Superfunds that invest in the following ESG's ".join(str(esg_selected)))
-            esg_selected = False
+            response = model.generate_content("Output a list of Superfunds that invest in the following Environtmental Social and Governance themes: ".join(str(esg_selected)))
+            
             return response.text
+            esg_selected = False
 
         #Rather than if else case , simply pass name of super through to function
         
