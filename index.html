@@ -166,14 +166,18 @@
         }
 
         function goBackToHome() {
+            // Clear the selections in both Super and ESG sections
+            document.querySelector('#super-section form').reset();
+            document.querySelector('#esg-section form').reset();
+
             // Hide active sections and go back to the home section
-            document.querySelectorAll('.form-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            setTimeout(() => {
-                document.getElementById('home-section').classList.remove('hidden');
-            }, 500); // Wait for the transition to finish
-        }
+            document.querySelectorAll('.form-section').forEach(section => {section.classList.remove('active');});
+
+        setTimeout(() => {
+            document.getElementById('home-section').classList.remove('hidden');
+        }, 500); // Wait for the transition to finish
+    }
+
     </script>
 </head>
 <body>
