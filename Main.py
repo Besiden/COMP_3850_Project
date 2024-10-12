@@ -76,15 +76,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Change to dynamic file reference
     
         if super_selected:
-                '''
-                Talia's (this code is also in the ipynb file)
-                # SuperPDF is a list of file paths under super_selected folder
-                SuperPDF = glob.glob("Documents/"+super_selected+"/*.pdf")
-                # prompt
-                prompt = "Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words and based on the files provided"
-                # *SuperPDF: * to unpack the list of file paths
-                response = model.generate_content([prompt,*SuperPDF])
-                '''
                 SuperPDF = genai.upload_file("Documents/"+super_selected+"/dud.txt") # < this should change to be a dynamic varaiables selected based on the supe presented
                 response = model.generate_content(["Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words and based on the files provided",SuperPDF])
                 # response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
