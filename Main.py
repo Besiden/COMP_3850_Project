@@ -17,12 +17,7 @@ import os
 
 genai.configure(api_key=os.environ["GENERATIVE_AI_API_KEY"])
 
-
 model = genai.GenerativeModel("gemini-1.5-flash")
-# response = model.generate_content("Say Hello")
-# print(response.text)
-
-
 
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -64,7 +59,7 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Initialize the message
         response_message = 'no valid combination selected' 
         # Should be re-written to null check(None Selected) and then pass input through to Generate AI function
-
+        
         if len(esg_selected) > 0:
             print(esg_selected)
             response = model.generate_content("Output a list of Superfunds that invest in the following ESG's ".join(str(esg_selected)))
