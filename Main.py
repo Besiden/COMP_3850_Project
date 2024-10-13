@@ -6,7 +6,6 @@
 ## Windows powershell : $env:GENERATIVE_AI_API_KEY = "YOUR_API_KEY"
 ## Linux/mac : export GENERATIVE_AI_API_KEY="YOUR_API_KEY"
 
-## Modify Line 21 To the desired prompt
 ## The prompt will be printed in the terminal
 
 ## requires python to be installed on your machine 
@@ -14,6 +13,7 @@
 
 import google.generativeai as genai
 import os
+import glob
 
 genai.configure(api_key=os.environ["GENERATIVE_AI_API_KEY"])
 
@@ -62,9 +62,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         
         if len(esg_selected) > 0:
             print(esg_selected)
-            response = model.generate_content("Output a list of Superfunds that invest in the following ESG's ".join(str(esg_selected)))
-            esg_selected = False
+            response = model.generate_content("Output a list of Superfunds that invest in the following Environtmental Social and Governance themes: ".join(str(esg_selected)))
+            
             return response.text
+            esg_selected = False
 
         #Rather than if else case , simply pass name of super through to function
         
@@ -72,9 +73,10 @@ class RequestHandler(BaseHTTPRequestHandler):
         # Change to dynamic file reference
     
         if super_selected:
-                SuperPDF = genai.upload_file("Documents/"+super_selected+"/*.pdf") # < this should change to be a dynamic varaiables selected based on the supe presented
+                SuperPDF = genai.upload_file("Documents/"+super_selected+"/dud.txt") # < this should change to be a dynamic varaiables selected based on the supe presented
                 response = model.generate_content(["Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words and based on the files provided",SuperPDF])
                 # response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
+                
                 print(response.text)
                 super_selected = False  #Reset the variable?
                 response_message = response.text
@@ -102,5 +104,3 @@ def run(server_class=HTTPServer, handler_class=RequestHandler):
 
 if __name__ == '__main__':
     run()
-    
-
