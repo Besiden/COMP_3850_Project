@@ -58,7 +58,6 @@ class RequestHandler(BaseHTTPRequestHandler):
         """
         # Initialize the message
         response_message = 'no valid combination selected' 
-        # Should be re-written to null check(None Selected) and then pass input through to Generate AI function
         
         if len(esg_selected) > 0:
             print(esg_selected)
@@ -74,9 +73,6 @@ class RequestHandler(BaseHTTPRequestHandler):
             for file in files:
                 uploaded_file = genai.upload_file(file)  # Upload each file individually
                 uploaded_files.append(uploaded_file)  # Add the uploaded file reference to the list
-
-            # Generate a prompt using all uploaded files
-            # prompt = ["Give me a basic summary of how " + str(super_selected) + " makes ESG conscious investments. The response should be less than 150 words and based on the content provided.", *uploaded_files]
 
             # Generate the response
             response = model.generate_content(["Give me a basic summary of how " + str(super_selected) + " makes ESG conscious investments. The response should be less than 500 words and use quotes from the files provided.", *uploaded_files])
