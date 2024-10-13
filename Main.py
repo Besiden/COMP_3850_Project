@@ -63,25 +63,29 @@ class RequestHandler(BaseHTTPRequestHandler):
         if len(esg_selected) > 0:
             print(esg_selected)
             response = model.generate_content("Output a list of Superfunds that invest in the following Environtmental Social and Governance themes: ".join(str(esg_selected)))
-            
             return response.text
-            esg_selected = False
 
-        #Rather than if else case , simply pass name of super through to function
-        
-        # Handle Super options
-        # Change to dynamic file reference
-    
         if super_selected:
-                SuperPDF = genai.upload_file("Documents/"+super_selected+"/dud.txt") # < this should change to be a dynamic varaiables selected based on the supe presented
-                response = model.generate_content(["Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words and based on the files provided",SuperPDF])
-                # response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
-                
-                print(response.text)
-                super_selected = False  #Reset the variable?
-                response_message = response.text
+            # Upload all files in the directory
+            directory = f"Documents/{super_selected}/"
+            files = [os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+            uploaded_files = []  # Initialize an empty list to store uploaded file references
 
-        return response_message
+            for file in files:
+                uploaded_file = genai.upload_file(file)  # Upload each file individually
+                uploaded_files.append(uploaded_file)  # Add the uploaded file reference to the list
+
+            # Generate a prompt using all uploaded files
+            # prompt = ["Give me a basic summary of how " + str(super_selected) + " makes ESG conscious investments. The response should be less than 150 words and based on the content provided.", *uploaded_files]
+
+            # Generate the response
+            response = model.generate_content(["Give me a basic summary of how " + str(super_selected) + " makes ESG conscious investments. The response should be less than 500 words and use quotes from the files provided.", *uploaded_files])
+            print(response.text)
+            super_selected = False  # Reset the variable
+            response_message = response.text
+
+        return response_message    
+        
 
     def send_response_message(self, message):
         """
