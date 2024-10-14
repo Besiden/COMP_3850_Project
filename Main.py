@@ -6,7 +6,6 @@
 ## Windows powershell : $env:GENERATIVE_AI_API_KEY = "YOUR_API_KEY"
 ## Linux/mac : export GENERATIVE_AI_API_KEY="YOUR_API_KEY"
 
-## Modify Line 21 To the desired prompt
 ## The prompt will be printed in the terminal
 
 ## requires python to be installed on your machine 
@@ -18,12 +17,7 @@ import glob
 
 genai.configure(api_key=os.environ["GENERATIVE_AI_API_KEY"])
 
-
 model = genai.GenerativeModel("gemini-1.5-flash")
-# response = model.generate_content("Say Hello")
-# print(response.text)
-
-
 
 import json
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -64,38 +58,30 @@ class RequestHandler(BaseHTTPRequestHandler):
         """
         # Initialize the message
         response_message = 'no valid combination selected' 
-        # Should be re-written to null check(None Selected) and then pass input through to Generate AI function
-
+        
         if len(esg_selected) > 0:
             print(esg_selected)
-            response = model.generate_content("Output a list of Superfunds that invest in the following ESG's ".join(str(esg_selected)))
-            esg_selected = False
+            response = model.generate_content("Output a list of Superfunds that invest in the following Environtmental Social and Governance themes: ".join(str(esg_selected)))
             return response.text
 
-        #Rather than if else case , simply pass name of super through to function
-        
-        # Handle Super options
-        # Change to dynamic file reference
-    
         if super_selected:
-                '''
-                Talia's (this code is also in the ipynb file)
-                # SuperPDF is a list of file paths under super_selected folder
-                SuperPDF = glob.glob("Documents/"+super_selected+"/*.pdf")
-                # prompt
-                prompt = "Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words and based on the files provided"
-                # *SuperPDF: * to unpack the list of file paths
-                response = model.generate_content([prompt,*SuperPDF])
-                '''
-                SuperPDF = genai.upload_file("Documents/"+super_selected+"/*.pdf") # < this should change to be a dynamic varaiables selected based on the supe presented
-                response = model.generate_content(["Give me a basic summary of how"+str(super_selected)+"makes ESG concious invesments. The Response Sould Be less than 150 Words and based on the files provided",SuperPDF])
-                # response = model.generate_content(["Give me a basic outline of the ESG Policy of Australian Super based on the provided PDF , in less than 100 words", AusSuperPDF])
-                
-                print(response.text)
-                super_selected = False  #Reset the variable?
-                response_message = response.text
+            # Upload all files in the directory
+            directory = f"Documents/{super_selected}/"
+            files = [os.path.join(directory, f) for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
+            uploaded_files = []  # Initialize an empty list to store uploaded file references
 
-        return response_message
+            for file in files:
+                uploaded_file = genai.upload_file(file)  # Upload each file individually
+                uploaded_files.append(uploaded_file)  # Add the uploaded file reference to the list
+
+            # Generate the response
+            response = model.generate_content(["Give me a basic summary of how " + str(super_selected) + " makes ESG conscious investments. The response should be less than 500 words and use quotes from the files provided.", *uploaded_files])
+            print(response.text)
+            super_selected = False  # Reset the variable
+            response_message = response.text
+
+        return response_message    
+        
 
     def send_response_message(self, message):
         """
