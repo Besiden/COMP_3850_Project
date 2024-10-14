@@ -80,10 +80,26 @@
             pointer-events: all;
         }
         #result-value {
-            font-size: 1.5em;
-            color: #007BFF;
-            user-select: none; 
+            font-size: 1.1em;
+            color: #000000;
+            user-select: none;
+            text-align: left; 
             cursor: default;   
+        }
+        #loading-spinner {
+            display: none; /* Hidden by default */
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+            margin: 20px auto; /* Center horizontally */
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         /* Transition styles for smooth page transitions */
         .fade-out {
@@ -110,50 +126,75 @@
         }
 
         async function handleSubmit(sectionId) {
-            var selectedSuper = document.querySelector('input[name="superOption"]:checked');
-            var selectedEsg = document.querySelectorAll('input[name="esgOption"]:checked');
-            
-            var superValue = selectedSuper ? selectedSuper.value : null;
-            var esgValues = Array.from(selectedEsg).map(checkbox => checkbox.value);
+    var selectedSuper = document.querySelector('input[name="superOption"]:checked');
+    var selectedEsg = document.querySelectorAll('input[name="esgOption"]:checked');
 
-            if (sectionId === 'super-section' && !superValue) {
-                alert('Please select a Super option before submitting.');
-                return;
-            }
+    var superValue = selectedSuper ? selectedSuper.value : null;
+    var esgValues = Array.from(selectedEsg).map(checkbox => checkbox.value);
 
-            if (sectionId === 'esg-section' && esgValues.length === 0) {
-                alert('Please select at least one ESG option before submitting.');
-                return;
-            }
+    if (sectionId === 'super-section' && !superValue) {
+        alert('Please select a Super option before submitting.');
+        return;
+    }
 
-            var data = {
-                superSelected: superValue,
-                esgSelected: esgValues
-            };
+    if (sectionId === 'esg-section' && esgValues.length === 0) {
+        alert('Please select at least one ESG option before submitting.');
+        return;
+    }
 
-            // Send data to Python server
-            const response = await fetch('http://localhost:8000/process', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
+    var data = {
+        superSelected: superValue,
+        esgSelected: esgValues
+    };
 
-            const result = await response.json();
+    // Disable all buttons
+    document.querySelectorAll('button').forEach(button => {
+        button.disabled = true;
+    });
 
-            // Update the result text first
-            document.getElementById('result-value').textContent = result.value;
+    // Show the loading spinner
+    document.getElementById('loading-spinner').style.display = 'block';
 
-            // Then switch to the result page with a fade-in effect
-            document.getElementById('form-page').style.opacity = 0;
-            setTimeout(() => {
-                document.getElementById('form-page').style.display = 'none';
-                document.getElementById('result-page').style.display = 'block';
-                document.getElementById('result-page').style.opacity = 1;
-                document.getElementById('result-page').style.pointerEvents = 'all';
-            }, 500);
-        }
+    try {
+        // Send data to Python server
+        const response = await fetch('http://localhost:8000/process', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        // Hide the spinner and show result
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('result-value').innerHTML = result.value
+            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')  // Replace double asterisks with bold tags
+            .replace(/\.\s/g, '.<br><br>')  // Two line breaks after each period
+            .replace(/\*/g, '<br>*')
+
+
+        // Switch to result page
+        document.getElementById('form-page').style.opacity = 0;
+        setTimeout(() => {
+            document.getElementById('form-page').style.display = 'none';
+            document.getElementById('result-page').style.display = 'block';
+            document.getElementById('result-page').style.opacity = 1;
+            document.getElementById('result-page').style.pointerEvents = 'all';
+        }, 500);
+
+    } catch (error) {
+        document.getElementById('loading-spinner').style.display = 'none';
+        alert('An error occurred: ' + error.message);
+    } finally {
+        // Re-enable buttons once the process is done
+        document.querySelectorAll('button').forEach(button => {
+            button.disabled = false;
+        });
+    }
+}
+
 
         function goBackToForm() {
             // Fade out result page and fade in form page
@@ -201,8 +242,8 @@
                     AustralianSuper
                 </label>
                 <label>
-                    <input type="radio" name="superOption" value="Host Plus Super">
-                    Host Plus Super
+                    <input type="radio" name="superOption" value="Aware Super">
+                    Aware Super
                 </label>
                 <label>
                     <input type="radio" name="superOption" value="Fake Super Company">
@@ -240,6 +281,7 @@
 
     </div>
 
+    <div id="loading-spinner"></div>
     <!-- Result Page -->
     <div id="result-page" class="container" style="opacity: 0;">
         <h1>Your Result:</h1>
