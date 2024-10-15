@@ -15,8 +15,22 @@ import google.generativeai as genai
 import os
 import glob
 
-genai.configure(api_key=os.environ["GENERATIVE_AI_API_KEY"])
 
+
+
+
+
+
+
+
+def checkkeyvalid():
+    try:
+        genai.configure(api_key=os.environ["GENERATIVE_AI_API_KEY"])
+    except KeyError:
+        apikey = input ("Enter API key :")
+        genai.configure(api_key=apikey)
+
+checkkeyvalid()
 model = genai.GenerativeModel("gemini-1.5-flash")
 
 import json
@@ -75,7 +89,7 @@ class RequestHandler(BaseHTTPRequestHandler):
                 uploaded_files.append(uploaded_file)  # Add the uploaded file reference to the list
 
             # Generate the response
-            response = model.generate_content(["Give me a basic summary of how " + str(super_selected) + " makes ESG conscious investments. The response should be less than 500 words and use quotes from the files provided.", *uploaded_files])
+            response = model.generate_content(["Give me a basic summary of how " + str(super_selected) + " makes ESG conscious investments. The response should be less than 300 words and use quotes from the files provided.", *uploaded_files])
             print(response.text)
             super_selected = False  # Reset the variable
             response_message = response.text
