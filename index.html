@@ -8,10 +8,11 @@
         body {
             font-family: Arial, sans-serif;
             margin: 0;
-            padding: 20px;
-            background: linear-gradient(120deg, #7dbcf3 0%, #8ec5fc 100%);
+            
+            padding-top: 140px;
+            background: #dedede;
         }
-        h1, h3 {
+        h1, h2 {
             text-align: center;
             color: #333;
             user-select: none;
@@ -19,10 +20,45 @@
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background-color: rgb(187, 217, 247);
+            background-color: rgb(211, 228, 245);
             padding: 20px;
             border-radius: 10px;
+            align-items: center;
+            justify-content: center;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .banner {
+            position: fixed; 
+            top: 0;
+            width: 100%; 
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background-color: #f0f0f0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            z-index: 1000; 
+}
+
+	.logo {
+            height: 100px;
+        }
+   
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-left: 10px;
+        }
+        .nav-buttons button {
+            padding: 5px 30px;
+            background-color: #008ddf;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .nav-buttons button:hover {
+            background-color: #0056b3;
         }
         .form-section {
             max-height: 0;
@@ -45,7 +81,7 @@
             width: 100%;
             padding: 10px;
             margin-top: 20px;
-            background-color: #007BFF;
+            background-color: #008ddf;
             color: white;
             border: none;
             border-radius: 5px;
@@ -58,16 +94,30 @@
         button:hover {
             background-color: #0056b3;
         }
-        /* Style for Back button */
+        
         .back-button {
-            background-color: #FF4D4D; /* Red background for Back button */
+            background-color: #FF4D4D;
         }
         .back-button:hover {
-            background-color: #CC0000; /* Darker red on hover */
+            background-color: #CC0000; 
         }
         .hidden {
             display: none;
         }
+        .bottom-right-img {
+            position: fixed;    
+            bottom: 0;          
+            right: 0;           
+            width: 13%;      
+            height: auto;      
+            margin: 10px; 
+            opacity: 0.3;    
+            z-index: 1000; 
+
+        }
+
+
+
         #result-page {
             opacity: 0;
             pointer-events: none;
@@ -87,20 +137,41 @@
             cursor: default;   
         }
         #loading-spinner {
-            display: none; /* Hidden by default */
-            border: 8px solid #f3f3f3; /* Light grey */
-            border-top: 8px solid #3498db; /* Blue */
+            display: none; 
+            border: 8px solid #f3f3f3; 
+            border-top: 8px solid #3498db; 
             border-radius: 50%;
             width: 60px;
             height: 60px;
             animation: spin 2s linear infinite;
-            margin: 20px auto; /* Center horizontally */
+            margin: 20px auto; 
         }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        #about-page {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            position: relative;  /* Change to 'relative' to allow normal page flow */
+            margin: 0px auto;  /* Center the container with top margin */
+            max-width: 600px;
+            width: 90%;          /* Make it responsive for smaller screens */
+            z-index: 1;
+            opacity: 0; 
+            transition: opacity 0.5s ease-in-out;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+
+
+        
         /* Transition styles for smooth page transitions */
         .fade-out {
             opacity: 0;
@@ -114,180 +185,323 @@
         }
     </style>
     <script>
-        function showSection(sectionId) {
-            document.getElementById('home-section').classList.add('hidden');
-            document.querySelectorAll('.form-section').forEach(section => {
-                section.classList.remove('active');
-            });
-            setTimeout(() => {
-                var section = document.getElementById(sectionId);
-                section.classList.add('active');
-            }, 100);
-        }
+       function showSection(sectionId) {
+    const homeSection = document.getElementById('home-section');
+    const targetSection = document.getElementById(sectionId);
 
-        async function handleSubmit(sectionId) {
-    var selectedSuper = document.querySelector('input[name="superOption"]:checked');
-    var selectedEsg = document.querySelectorAll('input[name="esgOption"]:checked');
+    // Hide the Home section and disable pointer events
+    homeSection.style.maxHeight = '0';
+    homeSection.style.opacity = '0';
+    homeSection.style.pointerEvents = 'none';
 
-    var superValue = selectedSuper ? selectedSuper.value : null;
-    var esgValues = Array.from(selectedEsg).map(checkbox => checkbox.value);
-
-    if (sectionId === 'super-section' && !superValue) {
-        alert('Please select a Super option before submitting.');
-        return;
-    }
-
-    if (sectionId === 'esg-section' && esgValues.length === 0) {
-        alert('Please select at least one ESG option before submitting.');
-        return;
-    }
-
-    var data = {
-        superSelected: superValue,
-        esgSelected: esgValues
-    };
-
-    // Disable all buttons
-    document.querySelectorAll('button').forEach(button => {
-        button.disabled = true;
+    // Hide any active form sections
+    document.querySelectorAll('.form-section').forEach(section => {
+        section.classList.remove('active');
     });
 
-    // Show the loading spinner
-    document.getElementById('loading-spinner').style.display = 'block';
-
-    try {
-        // Send data to Python server
-        const response = await fetch('http://localhost:8000/process', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        });
-
-        const result = await response.json();
-
-        // Hide the spinner and show result
-        document.getElementById('loading-spinner').style.display = 'none';
-        document.getElementById('result-value').innerHTML = result.value
-            .replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')  // Replace double asterisks with bold tags
-            .replace(/\.\s/g, '.<br><br>')  // Two line breaks after each period
-            .replace(/\*/g, '<br>*')
-
-
-        // Switch to result page
-        document.getElementById('form-page').style.opacity = 0;
-        setTimeout(() => {
-            document.getElementById('form-page').style.display = 'none';
-            document.getElementById('result-page').style.display = 'block';
-            document.getElementById('result-page').style.opacity = 1;
-            document.getElementById('result-page').style.pointerEvents = 'all';
-        }, 500);
-
-    } catch (error) {
-        document.getElementById('loading-spinner').style.display = 'none';
-        alert('An error occurred: ' + error.message);
-    } finally {
-        // Re-enable buttons once the process is done
-        document.querySelectorAll('button').forEach(button => {
-            button.disabled = false;
-        });
-    }
+    // Show the selected section after a brief delay
+    setTimeout(() => {
+        targetSection.classList.add('active');
+    }, 100);
 }
 
 
-        function goBackToForm() {
-            // Fade out result page and fade in form page
-            document.getElementById('result-page').style.opacity = 0;
+
+
+        async function handleSubmit(sectionId) {
+            var selectedSuper = document.querySelector('input[name="superOption"]:checked');
+            var selectedEsg = document.querySelectorAll('input[name="esgOption"]:checked');
+
+            var superValue = selectedSuper ? selectedSuper.value : null;
+            var esgValues = Array.from(selectedEsg).map(checkbox => checkbox.value);
+
+            if (sectionId === 'super-section' && !superValue) {
+                alert('Please select a Super option before submitting.');
+                return;
+            }
+
+            if (sectionId === 'esg-section' && esgValues.length === 0) {
+                alert('Please select at least one ESG option before submitting.');
+                return;
+            }
+
+            var data = {
+                superSelected: superValue,
+                esgSelected: esgValues
+            };
+
+            document.querySelectorAll('button').forEach(button => {
+                button.disabled = true;
+            });
+
+            document.getElementById('loading-spinner').style.display = 'block';
+
+            try {
+                const response = await fetch('http://localhost:8000/process', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                document.getElementById('loading-spinner').style.display = 'none';
+                document.getElementById('result-value').innerHTML = convertMarkdownToHTML(result.value);
+
+                document.getElementById('form-page').style.opacity = 0;
+                setTimeout(() => {
+                    document.getElementById('form-page').style.display = 'none';
+                    document.getElementById('result-page').style.display = 'block';
+                    document.getElementById('result-page').style.opacity = 1;
+                    document.getElementById('result-page').style.pointerEvents = 'all';
+                }, 500);
+
+            } catch (error) {
+                document.getElementById('loading-spinner').style.display = 'none';
+                alert('An error occurred: ' + error.message);
+            } finally {
+                document.querySelectorAll('button').forEach(button => {
+                    button.disabled = false;
+                });
+            }
+        }
+
+        function showAboutUs() {
+            const formPage = document.getElementById('form-page');
+            const aboutPage = document.getElementById('about-page');
+            const resultPage = document.getElementById('result-page'); // Add this line to access result page
+
+            // Hide result page
+            resultPage.style.opacity = 0;
             setTimeout(() => {
-                document.getElementById('result-page').style.pointerEvents = 'none';
-                document.getElementById('form-page').style.display = 'block';
-                document.getElementById('form-page').style.opacity = 1;
-            }, 500);
+                resultPage.style.display = 'none';  // Ensure result page is hidden
+
+                // Fade out form page
+                formPage.style.opacity = 0;
+                setTimeout(() => {
+                    formPage.style.display = 'none';  // Hide form page
+                 aboutPage.style.display = 'block';  // Make About Us visible
+                 aboutPage.style.opacity = 1;  // Fade in About Us
+                }, 500);  // Wait for form fade-out
+            }, 500);  // Wait for result fade-out
+        }
+
+
+
+        
+        function goBackToForm() {
+            // Ensure form page is visible but hidden initially
+            const formPage = document.getElementById('form-page');
+            const resultPage = document.getElementById('result-page');
+
+            // Hide result page with fade-out effect
+            resultPage.style.opacity = 0;
+
+            setTimeout(() => {
+                // Set display: none after fade-out transition
+                resultPage.style.display = 'none';
+                resultPage.style.pointerEvents = 'none';
+
+             // Show form page and reset its opacity for smooth fade-in
+             formPage.style.display = 'block';
+                formPage.style.opacity = 0;
+        
+                setTimeout(() => {
+                    // Fade in form page
+                    formPage.style.opacity = 1;
+                }, 50); // Small delay to ensure the display change is registered
+            }, 500); // Wait for the fade-out transition to complete
         }
 
         function goBackToHome() {
-            // Clear the selections in both Super and ESG sections
-            document.querySelector('#super-section form').reset();
-            document.querySelector('#esg-section form').reset();
+            const formPage = document.getElementById('form-page');
+            const aboutPage = document.getElementById('about-page');
+            const homeSection = document.getElementById('home-section');
+            const superSection = document.getElementById('super-section');
+            const esgSection = document.getElementById('esg-section');
 
-            // Hide active sections and go back to the home section
-            document.querySelectorAll('.form-section').forEach(section => {section.classList.remove('active');});
+             // Hide any active form sections
+            superSection.classList.remove('active');
+            esgSection.classList.remove('active');
 
-        setTimeout(() => {
-            document.getElementById('home-section').classList.remove('hidden');
-        }, 500); // Wait for the transition to finish
-    }
+            // Fade out About Us page if visible
+            aboutPage.style.opacity = 0;
+
+            setTimeout(() => {
+                aboutPage.style.display = 'none';  // Hide About Us
+
+                // Show Home section and re-enable pointer events
+                homeSection.style.maxHeight = '500px';
+                homeSection.style.opacity = '1';
+                homeSection.style.pointerEvents = 'all'; // Make buttons clickable again
+
+                // Reset form page visibility
+                formPage.style.display = 'block';
+                formPage.style.opacity = 1;
+            }, 500);  // Wait for the fade-out to complete
+        }
+
+        function convertMarkdownToHTML(markdown) {
+    // Convert headers
+    markdown = markdown.replace(/^######\s(.*)$/gm, '<h6>$1</h6>');
+    markdown = markdown.replace(/^#####\s(.*)$/gm, '<h5>$1</h5>');
+    markdown = markdown.replace(/^####\s(.*)$/gm, '<h4>$1</h4>');
+    markdown = markdown.replace(/^###\s(.*)$/gm, '<h3>$1</h3>');
+    markdown = markdown.replace(/^##\s(.*)$/gm, '<h2>$1</h2>');
+    markdown = markdown.replace(/^#\s(.*)$/gm, '<h1>$1</h1>');
+
+    // Convert bold & italic
+    markdown = markdown.replace(/\*\*\*(.*?)\*\*\*/g, '<b><i>$1</i></b>'); // Bold & Italic
+    markdown = markdown.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>'); // Bold
+    markdown = markdown.replace(/\*(.*?)\*/g, '<i>$1</i>'); // Italic
+
+    // Convert strikethrough
+    markdown = markdown.replace(/~~(.*?)~~/g, '<del>$1</del>'); // Strikethrough
+
+    // Convert unordered lists
+    markdown = markdown.replace(/^\s*[-*+]\s+(.*)$/gm, '<ul><li>$1</li></ul>');
+
+    // Convert ordered lists
+    markdown = markdown.replace(/^\s*\d+\.\s+(.*)$/gm, '<ol><li>$1</li></ol>');
+
+    // Convert inline code
+    markdown = markdown.replace(/`(.*?)`/g, '<code>$1</code>'); // Inline code
+
+    // Convert code blocks
+    markdown = markdown.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>'); // Code blocks
+
+    // Convert blockquotes
+    markdown = markdown.replace(/^>\s+(.*)$/gm, '<blockquote>$1</blockquote>'); // Blockquotes
+
+    // Convert links
+    markdown = markdown.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank">$1</a>'); // Hyperlinks
+
+    // Convert images
+    markdown = markdown.replace(/!\[([^\]]*)\]\((https?:\/\/[^\)]+)\)/g, '<img src="$2" alt="$1">'); // Images
+
+    // Convert horizontal rule
+    markdown = markdown.replace(/^---$|^\*\*\*$|^___$/gm, '<hr>'); // Horizontal rules
+
+    // Convert double newlines to paragraph
+    markdown = markdown.replace(/\n{2,}/g, '</p><p>'); // New paragraphs
+
+    // Wrap the entire content in <p> tags
+    markdown = `<p>${markdown}</p>`;
+
+    // Merge consecutive <ul> or <ol> tags
+    markdown = markdown.replace(/<\/ul>\s*<ul>/g, '').replace(/<\/ol>\s*<ol>/g, '');
+
+    return markdown;
+}
+
+
+
 
     </script>
+
 </head>
 <body>
-
-    <!-- Form Page -->
-    <div id="form-page" class="container">
-        <h1>Search by Super or ESG?</h1>
-
-        <!-- Home Section (Super/ESG Choice) -->
-        <div id="home-section" style="max-height: 500px; opacity: 1;">
-            <button type="button" onclick="showSection('super-section')">Super</button>
-            <button type="button" onclick="showSection('esg-section')">ESG</button>
+    <!-- Banner with Navigation -->
+    <div class="banner">
+        <img src="images/logo.png" alt="Logo" class="logo">
+        <div class="nav-buttons">
+            <button onclick="goBackToHome()">Home</button>
+            <button onclick="showAboutUs()">About Us</button>
         </div>
-
-        <!-- Super Section -->
-        <div id="super-section" class="form-section">
-            <h3>Select a Super</h3>
-            <form>
-                <label>
-                    <input type="radio" name="superOption" value="AustralianSuper">
-                    AustralianSuper
-                </label>
-                <label>
-                    <input type="radio" name="superOption" value="Aware Super">
-                    Aware Super
-                </label>
-                <label>
-                    <input type="radio" name="superOption" value="Test Super Company">
-                    Test Super Company
-                </label>
-                <label>
-                    <input type="radio" name="superOption" value="WestPac Super">
-                    WestPac Super
-                </label>
-            </form>
-            <button type="button" onclick="handleSubmit('super-section')">Submit</button>
-            <button type="button" class="back-button" onclick="goBackToHome()">Back</button> <!-- Red Back button -->
-        </div>
-
-        <!-- ESG Section -->
-        <div id="esg-section" class="form-section">
-            <h3>Select an ESG</h3>
-            <form>
-                <label>
-                    <input type="checkbox" name="esgOption" value="Firearms">
-                    Firearms
-                </label>
-                <label>
-                    <input type="checkbox" name="esgOption" value="Fossil Fuels">
-                    Fossil Fuels
-                </label>
-                <label>
-                    <input type="checkbox" name="esgOption" value="Renewables">
-                    Renewables
-                </label>
-            </form>
-            <button type="button" onclick="handleSubmit('esg-section')">Submit</button>
-            <button type="button" class="back-button" onclick="goBackToHome()">Back</button> <!-- Red Back button -->
-        </div>
-
     </div>
 
-    <div id="loading-spinner"></div>
-    <!-- Result Page -->
-    <div id="result-page" class="container" style="opacity: 0;">
-        <h1>Your Result:</h1>
-        <p id="result-value"></p>
-        <button type="button" onclick="goBackToForm()">Back to Form</button>
-    </div>
+        <!-- Form Page -->
+        <div id="form-page" class="container">
+            <h1>SuperSearch</h1>
+            
+    
+            <!-- Home Section (Super/ESG Choice) -->
+            <div id="home-section" style="max-height: 500px; opacity: 1;">
+                <h2>Search by Super or ESG?</h2>
+                <button type="button" onclick="showSection('super-section')">Super</button>
+                <button type="button" onclick="showSection('esg-section')">ESG</button>
+            </div>
+    
+            <!-- Super Section -->
+            <div id="super-section" class="form-section">
+                <h3>Select a Super</h3>
+                <form>
+                    <label>
+                        <input type="radio" name="superOption" value="AustralianSuper">
+                        AustralianSuper
+                    </label>
+                    <label>
+                        <input type="radio" name="superOption" value="Aware Super">
+                        Aware Super
+                    </label>
+                    <label>
+                        <input type="radio" name="superOption" value="Test Super Company">
+                        Test Super Company
+                    </label>
+                    <label>
+                        <input type="radio" name="superOption" value="WestPac Super">
+                        WestPac Super
+                    </label>
+                </form>
+                <button type="button" onclick="handleSubmit('super-section')">Submit</button>
+                <button type="button" class="back-button" onclick="goBackToHome()">Back</button> <!-- Red Back button -->
+            </div>
+    
+            <!-- ESG Section -->
+            <div id="esg-section" class="form-section">
+                <h3>Select ESG/s</h3>
+                <form>
+                    <label>
+                        <input type="checkbox" name="esgOption" value="Firearms">
+                        Firearms
+                    </label>
+                    <label>
+                        <input type="checkbox" name="esgOption" value="Fossil Fuels">
+                        Fossil Fuels
+                    </label>
+                    <label>
+                        <input type="checkbox" name="esgOption" value="Renewables">
+                        Renewables
+                    </label>
+                </form>
+                <button type="button" onclick="handleSubmit('esg-section')">Submit</button>
+                <button type="button" class="back-button" onclick="goBackToHome()">Back</button> <!-- Red Back button -->
+            </div>
+    
+        </div>
+    
+        <div id="loading-spinner"></div>
+        <!-- Result Page -->
+        <div id="result-page" class="container" style="opacity: 0;">
+            <h1>Your Result:</h1>
+            <p id="result-value"></p>
+            <button type="button" onclick="goBackToForm()">Back to Form</button>
+        </div>
 
+
+    <!-- About Us Page -->
+    <div id="about-page" class="container" style="display: none;">
+        <h1>About Us</h1>
+        <p>We are a small team based out of Sydney looking to assist the Superannuation Industry by creating an AI-powered search tool, that is capable of sifting through multiple documents outlining the spending of a company.</p>
+        <p>We employ Artificial Intelligence to scan documents such as PDFs of Super's spending to provide the user with a concised view of the ethical, social and governance spendings of each super, to provide deeper insight of where money is being spent.</p>
+        <h4>How to use tool</h4>
+        <p><b>1. </b>Select if you would like to filter the search by a specific Super or a range of ESG issue. </p>
+        <p><b>2. </b>Select a Super to access, or if by ESG selecting one or more issues to search by.</p>
+        <p><b>3. </b>View results powered by AI to provide a natural language response.</p>
+        
+        <button type="button" onclick="goBackToHome()">Back to Home</button>
+    </div>
+    <img src="images/logo.png" alt="Floating Image" class="bottom-right-img">
+
+  
+
+
+
+
+
+
+    
 </body>
 </html>
